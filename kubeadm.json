@@ -1,0 +1,65 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "source_ami_filter": {
+      "filters": {
+      "virtualization-type": "hvm",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*",
+      "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "instance_type": "t2.medium",
+    "ssh_username": "ubuntu",
+    "ami_name": "kubeadm-1.15.3-{{timestamp}}",
+    "launch_block_device_mappings": [
+      {
+        "device_name": "/dev/sda1",
+        "volume_size": 40,
+        "volume_type": "gp2",
+        "delete_on_termination": true
+      }
+    ]
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "scripts/bake-docker.sh",
+      "destination": "/tmp/bake-docker.sh"
+    },
+    {
+      "type": "file",
+      "source": "scripts/bake-kubeadm.sh",
+      "destination": "/tmp/bake-kubeadm.sh"
+    },
+    {
+      "type": "file",
+      "source": "scripts/runtime-kubeadm.sh",
+      "destination": "/tmp/runtime-kubeadm.sh"
+    },
+    {
+      "type": "file",
+      "source": "scripts/info-k8s-dashboard.sh",
+      "destination": "/tmp/info-k8s-dashboard.sh"
+    },
+    {
+      "type": "file",
+      "source": "manifests/kubernetes-dashboard-public.yaml",
+      "destination": "/tmp/kubernetes-dashboard-public.yaml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo chmod +x /tmp/bake-docker.sh",
+        "sudo chmod +x /tmp/bake-kubeadm.sh",
+        "sudo chmod +x /tmp/runtime-kubeadm.sh",
+        "sudo chmod +x /tmp/info-k8s-dashboard.sh",
+        "sudo mv /tmp/runtime-kubeadm.sh /usr/local/bin/k8s-master-init",
+        "sudo mv /tmp/info-k8s-dashboard.sh /usr/local/bin/k8s-dashboard-info",
+        "sudo mv /tmp/kubernetes-dashboard-public.yaml /opt/kubernetes-dashboard-public.yaml",
+        "sudo /tmp/bake-docker.sh",
+        "sudo /tmp/bake-kubeadm.sh"
+      ]
+    }]
+}
