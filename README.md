@@ -1,6 +1,6 @@
 # packer-kubeadm
 
-Thia Packer template `kubeadm.json` builds an Amazon AMI with kubeadm and it's prerequisites installed.
+This Packer template `kubeadm.json` builds an Amazon AMI with kubeadm and it's prerequisites installed.
 Includes Docker, kubelet, and kubeadm.
 
 | image          | k8s-version | docker-version | os-version   |
