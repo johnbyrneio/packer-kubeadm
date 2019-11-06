@@ -4,7 +4,7 @@
 # It closely follows the official kubeadm docs.
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
-K8S_VERSION=1.15.3 # 'apt-cache madison kubectl' will tell you available versions
+K8S_VERSION=1.16.2 # 'apt-cache madison kubectl' will tell you available versions
 
 # Add Kubernetes yum repo
 echo "Enabling Kubernetes yum repo"

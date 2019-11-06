@@ -12,7 +12,7 @@
     },
     "instance_type": "t2.medium",
     "ssh_username": "ubuntu",
-    "ami_name": "kubeadm-1.15.3-{{timestamp}}",
+    "ami_name": "kubeadm-1.16.2-{{timestamp}}",
     "launch_block_device_mappings": [
       {
         "device_name": "/dev/sda1",

@@ -4,13 +4,15 @@
 # instance is lanched from the AMI. It will initialize the first master node of a new
 # cluster.
 
-K8S_VERSION=1.15.3
+K8S_VERSION=1.16.2
 
 # Wait for cloud-init to finish running in case user-data is providing additional config
-if [ ! -f /var/lib/cloud/instance/boot-finished ]; then
-    echo "System is still initializing. Try running again in 60 seconds."
-    exit 1
-fi
+# NOTE: This is script will be run by cloud-init. This check is now disabled and will likely be removed.
+# while [ ! -f /var/lib/cloud/instance/boot-finished ]
+# do    
+#     echo "Waiting for cloud-init to complete..."
+#     sleep 5
+# done
 
 # Backup the log file if this is a re-run.
 if [[ -e /tmp/kubeadm.log ]] ; then
@@ -25,20 +27,20 @@ sudo su -c "kubeadm init --kubernetes-version ${K8S_VERSION} \
              >> /tmp/kubeadm.log
 
 echo "Copying kubeconfig for Kubernetes admin user..."
-mkdir -p $HOME/.kube                                                                                                                                                
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config                                                                                                            
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+mkdir -p /home/ubuntu/.kube                                                                                                                                                
+sudo cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config                                                                                                            
+sudo chown ubuntu:ubuntu /home/ubuntu/.kube/config
 
 # Install Calico
 echo "Installing Calico..."
-kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml >> /tmp/kubeadm.log
+kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml --kubeconfig /etc/kubernetes/admin.conf >> /tmp/kubeadm.log
 
 # Install Kubernetes Dashboard
 echo "Deploying Kubernetes Dashboard..."
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml >> /tmp/kubeadm.log
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml --kubeconfig /etc/kubernetes/admin.conf >> /tmp/kubeadm.log
 
 # Expose the dashboard via NodePort but keep it secure
-kubectl apply -f /opt/kubernetes-dashboard-public.yaml >> /tmp/kubeadm.log
+kubectl apply -f /opt/kubernetes-dashboard-public.yaml --kubeconfig /etc/kubernetes/admin.conf >> /tmp/kubeadm.log
 
 echo ""
 echo "Kubernetes started, but system pods are still initializing."
